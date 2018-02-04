@@ -31,7 +31,8 @@ ffmpeg.exe -ss 00:00:25   -i old.avi -to 0:14:53 -trellis 2  -q:v 1 -vf fade=in:
 ffmpeg.exe -ss 00:00:25 -i old.avi -to 0:14:53 -bf 2 -trellis 2 -cmp 2 -subcmp 2 -q:v 1 -vf fade=in:25,fade=out:22295:23 new.avi
 
 here's what's what:
--ss 00:00:25 -i old.avi talks about your larger input file: the starting cut of this larger "old.avi" will be done 25 secs after its start.
+-ss 00:00:25 -i old.avi talks about your larger input file: the starting cut of this larger "old.avi"
+              will be done 25 secs after its start.
 
 every option after "old.avi" belongs to the smaller "new.avi" that will be cut out from "old.avi"
 

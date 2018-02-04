@@ -1,0 +1,96 @@
+                                   FFMPEG notes
+
+These snippets were done on Windows and Linux while finding out how
+ffmpeg works. They must have worked at the time I made them. But
+there's no guarantee they still work. And they might be outright
+wrong. Check them before you use them.
+
+                                     * * *
+				     
+Notes on Windows, from  around 2014, 2016:
+
+-----------------------------
+qscale 1 = copy input file to best quality
+
+"fade=in/out" 
+http://askubuntu.com/questions/156394/how-to-add-fade-out-and-fade-in-effects-by-convert-command
+
+ffmpeg.exe -i input.avi -qscale 1  -vf fade=in:0:20,fade=out:5295:20 output.avi
+
+to cut the last part of a video from 01:04:35 on, and fade in the first 25 frames in the output video:
+ffmpeg.exe -ss 01:04:35 -i original.avi -q:v 1  -vf fade=in:25 original.edited.avi
+
+ffmpeg.exe -t 00:13:37 -i orig.wmv -me full -q:v 1   newcut.wmv
+
+----------------------
+
+000:
+ffmpeg.exe -ss 00:00:25   -i old.avi -to 0:14:53 -trellis 2  -q:v 1 -vf fade=in:25,fade=out:22295:23 new.avi
+
+002:
+ffmpeg.exe -ss 00:00:25 -i old.avi -to 0:14:53 -bf 2 -trellis 2 -cmp 2 -subcmp 2 -q:v 1 -vf fade=in:25,fade=out:22295:23 new.avi
+
+here's what's what:
+-ss 00:00:25 -i old.avi talks about your larger input file: the starting cut of this larger "old.avi" will be done 25 secs after its start.
+
+every option after "old.avi" belongs to the smaller "new.avi" that will be cut out from "old.avi"
+
+"-to 0:14:53" means the new file will run 14 mins and 53 secs.
+"vf fade=in:25" means the start of the new file will be faded in
+                25 frames (i.e. 1 sec with a 25 fps video) 
+
+plus the appended
+"fade=out:22295:23" simply means the new file has 22318 frames (22295+23) - and you start the fade out
+                    23 frames before the end of the new file, i.e. at 22295.
+
+google these options yourself - they simply should up the quality of your new clip :"bf 2 -trellis 2 -cmp 2 -subcmp 2"
+
+------------------- 
+ffmpeg.exe -ss 00:34:01.50 -i old.avi -to 0:08:19.600 -bf 2 -trellis 2 -cmp 2 -subcmp 2 -q:v 1 -vf fade=in:25,fade=out:12475:15 new.avi
+
+
+
+
+                             Linux notes, older and newer ones:
+
+
+
+2011:
+
+# ape to flac/WAV ??: 
+# http://ubuntuforums.org/showthread.php?t=1018194
+ffmpeg -i inputaudio.ape outputaudio.flac
+
+# http://gimpel.gi.funpic.de/wiki/index.php?title=Howto:convert_ape_to_wav/mp3/ogg_on_Linux
+ffmpeg -i file.ape output.wav
+
+--------------------------------
+
+around 2014/15?:
+
+ffmpeg -ss 00:01:45 -i file.mp4 -filter afade=t=in:ss=0:d=2 file.wav
+
+whatswhat:
+-ss 00:01:45 = start cutting the input file (-i) at 01:45
+afade=t=in:ss=0:d=2 = fade into the file.wav 2 secs after start ...
+(man ffmpeg-all)
+
+--------------
+
+ffmpeg -ss 00:01:45 -i some.video.mp4 -to 00:14:56 -filter afade=t=in:ss=0:d=2,afade=t=out:st=894:d=2  some.new.audio.wav
+
+whatswhat:
+-to 00:14:56 = the some.new.audio.wav will last 00:14:56 (896 secs)
+afade=t=out:st=894:d=2 = the new file will be 896 secs long ("00:14:56")
+                         so fading out will be started 2 secs ("d=2") before 89
+
+-----------------------
+
+2018:
+
+encoding all sorts of files in a folder to mp3 (from a Fedora list, edited) :
+
+for f in *.*; do ffmpeg -i "$f" -codec:a libmp3lame -qscale:a 0 "${f/%.*/.mp3}"; done
+
+make sure the input file names before suffix differ: otherwise
+ffmpeg might ask to overwrite an mp3 it made .. 
